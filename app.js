@@ -29,9 +29,15 @@ const sea=document.getElementById('sea'),$=id=>document.getElementById(id);
 let W=innerWidth,H=innerHeight;addEventListener('resize',()=>{W=innerWidth;H=innerHeight});
 // ---- Scenery ----
 for(let i=0;i<6;i++){const r=document.createElement('div');r.className='ray';r.style.left=(i*18-5)+'%';r.style.animationDelay=(-i*1.3)+'s';sea.appendChild(r)}
-const weedCols=['#2d6a4f','#40916c','#52b788','#1b4332','#3a7d44','#588157'];
-for(let i=0;i<22;i++){const h=60+Math.random()*170,d=document.createElement("div");d.className="weed";d.style.left=(i*4.6-1+Math.random()*2.5)+'%';d.style.animationDelay=(-Math.random()*3)+'s';d.style.animationDuration=(2.5+Math.random()*2)+'s';
- d.innerHTML=S(`0 0 40 ${h}`,`<path d="M20 ${h} Q5 ${h*.75} 20 ${h*.5} Q35 ${h*.25} 20 0" stroke="${weedCols[i%6]}" stroke-width="10" fill="none" stroke-linecap="round"/>`);d.style.width='40px';d.style.height=h+'px';sea.appendChild(d)}
+const WEEDS=[
+h=>({w:50,svg:`<path d="M25 ${h} Q8 ${h*.7} 25 ${h*.45} Q40 ${h*.2} 25 0" stroke="#6b8e23" stroke-width="7" fill="none" stroke-linecap="round"/>${[.2,.38,.56,.74].map((f,i)=>`<ellipse cx="${i%2?33:17}" cy="${h*f}" rx="9" ry="5" fill="#8a9a2b" transform="rotate(${i%2?30:-30} ${i%2?33:17} ${h*f})"/><circle cx="${i%2?28:22}" cy="${h*f+3}" r="4" fill="#c2b83a"/>`).join('')}`,min:170}),
+h=>({w:40,svg:`<path d="M20 ${h} C0 ${h*.8} 40 ${h*.6} 20 ${h*.4} C0 ${h*.25} 40 ${h*.1} 20 0" stroke="#52b788" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M20 ${h} C0 ${h*.8} 40 ${h*.6} 20 ${h*.4} C0 ${h*.25} 40 ${h*.1} 20 0" stroke="#95d5b2" stroke-width="3" fill="none"/>`}),
+h=>{const c=Math.random()<.5?'#c9184a':'#7b2cbf';const br=(x,y,l,a,d)=>{const x2=x+Math.sin(a)*l,y2=y-Math.cos(a)*l;return `<path d="M${x} ${y} L${x2} ${y2}" stroke="${c}" stroke-width="${2+d*1.5}" stroke-linecap="round"/>`+(d?br(x2,y2,l*.72,a-.45,d-1)+br(x2,y2,l*.72,a+.45,d-1):`<circle cx="${x2}" cy="${y2}" r="3" fill="${c}"/>`)};return{w:90,svg:br(45,h,h*.32,0,4),min:70,max:140}},
+h=>({w:60,svg:[...Array(9)].map((_,i)=>{const x=10+i*5,hh=h*(.6+Math.random()*.4);return `<path d="M${x} ${h} Q${x+(i-4)*3} ${h-hh*.5} ${x+(i-4)*5} ${h-hh}" stroke="${i%2?'#74c69d':'#40916c'}" stroke-width="3" fill="none" stroke-linecap="round"/>`}).join(''),min:40,max:80}),
+h=>({w:80,svg:[[40,h*.55,0],[22,h*.65,-35],[58,h*.65,35],[30,h*.4,-15],[50,h*.4,15]].map(([x,y,r])=>`<path d="M40 ${h} Q${x-18} ${y} ${x} ${y-h*.35} Q${x+18} ${y} 40 ${h}Z" fill="#80b918" fill-opacity=".85" stroke="#55a630" stroke-width="2" transform="rotate(${r} 40 ${h})"/>`).join(''),min:60,max:110})];
+for(let i=0;i<22;i++){const kind=WEEDS[i%5],raw=60+Math.random()*170,tmp=kind(raw),h=Math.max(tmp.min||0,Math.min(tmp.max||999,raw)),k=kind(h),d=document.createElement('div');d.className='weed';
+ d.style.left=(i*4.6-1+Math.random()*2.5)+'%';d.style.animationDelay=(-Math.random()*3)+'s';d.style.animationDuration=(2.5+Math.random()*2)+'s';d.style.width=k.w+'px';d.style.height=h+'px';
+ d.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${k.w} ${h}" overflow="visible">${k.svg}</svg>`;sea.appendChild(d)}
 for(let i=0;i<22;i++){const b=document.createElement('div'),s=6+Math.random()*18;b.className='bub';Object.assign(b.style,{width:s+'px',height:s+'px',left:Math.random()*100+'%',animationDuration:(6+Math.random()*8)+'s',animationDelay:(-Math.random()*12)+'s'});sea.appendChild(b)}
 // ===== ocean-creatures additions =====
 const FIVE={
@@ -141,7 +147,7 @@ async function research(q){q=q.trim();if(!q)return{err:'Type the name of a sea a
  try{const sj=await (await fetch('https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=6&srsearch='+encodeURIComponent(q))).json();const hits=(sj.query&&sj.query.search)||[];
   for(const h of hits){const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(h.title.replace(/ /g,'_')));if(!r.ok)continue;const p=await r.json();
    if(p.type==='disambiguation')continue;const txt=(p.description||'')+' '+(p.extract||'');if(!ANIMAL.test(txt)||BAD.test(p.description||''))continue;
-   const sents=simplify(p.extract||'').split(/(?<=[.!?])\s+(?=[A-Z])/).map(s=>s.trim()).filter(s=>s.length>15&&s.length<220).slice(0,5);if(!sents.length)continue;
+   const sents=simplify(p.extract||'').split(/(?<=[.!?])\s+(?=[A-Z])/).map(s=>s.trim()).filter(s=>s.length>15&&s.split(/\s+/).length<=25&&!/\b[A-Z]\. [a-z]{3,}/.test(s)).slice(0,5);if(!sents.length)continue;
    const thumb=p.thumbnail?await toDataURL(p.thumbnail.source):'';return{ok:{id:'r_'+p.title.toLowerCase().replace(/[^a-z0-9]+/g,'_'),title:p.title,facts:sents,thumb,col:PAL[Math.abs([...p.title].reduce((a,c)=>a+c.charCodeAt(0),0))%PAL.length],url:(p.content_urls&&p.content_urls.desktop.page)||'',t:Date.now()}}}
   return{err:'🤔 We couldn\'t find a sea animal called "'+q+'". Try another name!'}}catch(e){return{err:'📡 Couldn\'t reach Wikipedia. Check the internet and try again.'}}}
 $('rgo').onclick=async()=>{const q=$('rq').value;$('rmsg').textContent='🔎 Diving into Wikipedia…';$('rgo').disabled=true;const r=await research(q);$('rgo').disabled=false;
