@@ -93,7 +93,7 @@ function spawn(type){const c=C[type]||resAsC(RES[type]),k=scale(),el=document.cr
  el.onclick=e=>{e.stopPropagation();showInfo(type)};sea.appendChild(el);things.push(t);refreshSel();return t}
 function spawnSelfie(s){if(things.some(t=>t.selfie&&t.selfie.id===s.id))return;const a=AV[s.av]||AV.mermaid,av=AV[s.av]?s.av:'mermaid',k=scale(),w=a.px*k,h=w*a.vb[1]/a.vb[0],el=document.createElement('div');el.className='cr selfie avt';
  const sk=SKIN[(s.id.charCodeAt(0)||0)%5];el.innerHTML=`<div class="body">${avSVG(av,s.col,sk)}</div>`;Object.assign(el.style,{width:w+'px',height:h+'px'});
- const t={id:++uid,selfie:s,av,m:a.m,el,w,h,x:Math.random()*(W-w),by:a.m==='floor'?H*.87-h*.7:H*(.15+Math.random()*.5),dir:Math.random()<.5?1:-1,sp:(a.m==='jelly'?.35:.6)+Math.random()*.5,ph:Math.random()*6};
+ const t={id:++uid,selfie:s,av,m:a.m,el,w,h,x:Math.random()*(W-w),by:a.m==='floor'?Math.min(H*.87,$('bar').offsetTop)-h*.95:H*(.15+Math.random()*.5),dir:Math.random()<.5?1:-1,sp:(a.m==='jelly'?.35:.6)+Math.random()*.5,ph:Math.random()*6};
  t.body=el.firstChild;t.face=circleEl(s.img,'face');el.appendChild(t.face);if(s.name){const l=document.createElement('div');l.className='lbl';l.textContent=s.name;el.appendChild(l)}placeFace(t);
  el.onclick=e=>{e.stopPropagation();toast('👋 Hi '+(s.name||'friend')+'! You are a '+(RES[s.av]?.title||a.n)+'!')};sea.appendChild(el);things.push(t);
  const ss=things.filter(t=>t.selfie).sort((a,b)=>a.selfie.t-b.selfie.t);while(ss.length>MAX_SELFIES)kill(ss.shift());refreshSel();return t}
