@@ -38,8 +38,10 @@ function addTrash(k,x){const d=TR[k],el=document.createElement('div');el.classNa
  el.innerHTML=`<svg viewBox="0 0 ${d.w} ${d.h}" width="100%" height="100%" overflow="visible">${d.svg}</svg>`;Object.assign(el.style,{width:w+'px',height:h+'px'});
  const t={k,el,w,h,x:x??Math.random()*(W-w),y:-h-Math.random()*40,vy:d.sink*(.8+Math.random()*.4),ph:Math.random()*6,rot:Math.random()*40-20,rest:d.micro?H*(.35+Math.random()*.25):floorY(h)};
  el.onclick=e=>{e.stopPropagation();trashCard(k)};sea.appendChild(el);trash.push(t);return t}
+const oilTop=()=>{const t=$('title');return t?Math.ceil(t.getBoundingClientRect().bottom)+6:0};
+addEventListener('resize',()=>{if(oil)oil.el.style.top=oilTop()+'px'});
 function addOil(){if(oil)return;const el=document.createElement('div');el.className='oil';el.innerHTML=`<svg viewBox="0 0 300 80" width="100%" height="100%" preserveAspectRatio="none"><defs><linearGradient id="og" x1="0" x2="1"><stop offset="0" stop-color="#222"/><stop offset=".35" stop-color="#3a2d5c"/><stop offset=".55" stop-color="#1f4d4a"/><stop offset=".8" stop-color="#4a3a1a"/><stop offset="1" stop-color="#222"/></linearGradient></defs><path d="M10 20 Q60 2 150 8 Q250 2 292 22 Q280 40 200 38 Q120 44 40 38 Q4 34 10 20Z" fill="url(#og)" opacity=".88"/>${[50,110,170,230].map((x,i)=>`<path class="drip" style="animation-delay:${-i*.7}s" d="M${x} 36 q-5 12 0 18 q5 -6 0 -18z" fill="#222"/>`).join('')}</svg>`;
- const w=Math.min(W*.45,520);Object.assign(el.style,{width:w+'px',height:w*.27+'px',left:(W*.5-w*.3)+'px',top:'0px'});el.onclick=e=>{e.stopPropagation();trashCard('oil')};sea.appendChild(el);oil={el,w,s:1}}
+ const w=Math.min(W*.45,520);Object.assign(el.style,{width:w+'px',height:w*.27+'px',left:(W*.5-w*.3)+'px',top:oilTop()+'px'});el.onclick=e=>{e.stopPropagation();trashCard('oil')};sea.appendChild(el);oil={el,w,s:1}}
 function pollute(){if(cleaning)return toast('The cleanup crew is busy! 🚤');const first=!trash.length&&!oil;
  const batch=first?[...KINDS,'micro']:[...Array(6)].map(()=>KINDS[Math.random()*KINDS.length|0]);if(first)addOil();
  if(trash.length+batch.length>45){toast('The sea is already very dirty! Try 🚤 Ocean Cleanup.');return}
@@ -73,7 +75,7 @@ function cleanup(){if(cleaning)return;if(!trash.length&&!oil){toast('✨ The oce
  cleaning=true;pending.forEach(clearTimeout);pending=[];toast('🚤 Cleanup crew to the rescue!');
  const sw=Math.min(W*.6,640);const boom=mkFx('boom',`<svg viewBox="0 0 400 60" width="100%" height="100%" preserveAspectRatio="none" overflow="visible"><path d="M0 10 Q200 70 400 10" stroke="#023e8a" stroke-opacity=".35" stroke-width="16" fill="none"/><path d="M0 10 Q200 60 400 10" stroke="#ffd60a" stroke-width="9" fill="none" stroke-dasharray="18 6"/><path d="M0 14 Q200 64 400 14" stroke="#fff" stroke-opacity=".3" stroke-width="2" fill="none"/></svg>`,sw,60,-sw,H*.12);boom.vx=2.2;boom.sweep=1;
  const ib=mkFx('interceptor',BOAT('#06d6a0','SKIMMER','<path d="M2 34 L-30 60" stroke="#495057" stroke-width="5"/><path d="M-34 56 h24 v8 h-24z" fill="#495057"/>'),150,75,W+40,H*.02);ib.vx=-1.6;ib.sweep=1;
- if(oil){const ob=mkFx('oilskim',BOAT('#ff9f1c','OIL SKIM','<path d="M8 40 Q-30 50 -40 30" stroke="#ffd60a" stroke-width="5" fill="none"/>'),150,75,-180,H*.01);ob.oil=1;ob.vx=1.4}
+ if(oil){const ob=mkFx('oilskim',BOAT('#ff9f1c','OIL SKIM','<path d="M8 40 Q-30 50 -40 30" stroke="#ffd60a" stroke-width="5" fill="none"/>'),150,75,-180,Math.max(0,oilTop()-50));ob.oil=1;ob.vx=1.4}
  const bh=Math.min(70,H*.08);const beach=mkFx('beach',`<div style="font-size:${bh*.6}px;white-space:nowrap">🏖️🧒🪣 🧑‍🦱🪣 👧🪣</div>`,240,bh,W-250,H-bh-6);beach.static=1;
  const cols=['#ef476f','#118ab2','#7b2cbf'];
  [0,1,2].forEach(i=>{const s=Math.max(.8,Math.min(1.2,Math.min(W,H)/700));const d=mkFx('diver',DIVER(cols[i]),110*s,60*s,(i+1)*W/4,-80-i*40);d.worker=1;d.diver=1;d.netOnly=i===0;d.sp=3.2;workers.push(d)});
