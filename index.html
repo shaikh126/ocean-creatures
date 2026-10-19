@@ -20,7 +20,9 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:"Comic Sans MS","Chal
 .cr.hl{filter:drop-shadow(0 0 12px #ff0) drop-shadow(0 0 22px #ff0)}
 .selfie .face{border-radius:50%;border:5px solid #caf0f8;box-shadow:0 0 0 3px #0096c7,inset 0 0 18px #fff8;background-size:cover;background-position:center}
 .selfie .lbl{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:#fff;color:#023e8a;border-radius:12px;padding:2px 10px;font-size:16px;white-space:nowrap;margin-top:4px}
-#bar{position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:rgba(2,62,138,.55);z-index:10}
+#bar{position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:rgba(2,62,138,.8);z-index:10;padding-right:96px;transform:translateY(110%);transition:transform .35s ease;border-radius:24px 24px 0 0}
+#bar.open{transform:none}
+#menub{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:12;width:72px;height:72px;min-height:72px;padding:0;border-radius:50%;font-size:30px;line-height:1;background:#ff70a6;color:#fff;box-shadow:0 4px 0 #c94d7d,0 0 0 4px #fff;display:flex;flex-direction:column;align-items:center;justify-content:center}#menub span{font-size:13px}
 button,select{font:inherit;font-size:20px;min-height:56px;padding:8px 18px;border:none;border-radius:28px;background:#ffd60a;color:#023e8a;box-shadow:0 4px 0 #c9a400;cursor:pointer}
 button:active{transform:translateY(3px);box-shadow:0 1px 0 #c9a400}
 select{background:#fff;box-shadow:0 4px 0 #90e0ef}
@@ -51,7 +53,17 @@ input{font:inherit;font-size:22px;padding:10px 16px;border-radius:20px;border:3p
 .avt .tl{animation:swish 1s ease-in-out infinite alternate}@keyframes swish{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
 .card .thumb{max-width:260px;max-height:200px;border-radius:20px;border:5px solid #90e0ef}.credit{font-size:16px!important;text-align:center!important}
 .rbox input{width:62%}.rbox p{text-align:center;font-size:19px;min-height:1em}
-.weed{bottom:max(8%,135px)}
+.trash,.fx{position:absolute;left:0;top:0;cursor:pointer;z-index:3;will-change:transform}.fx{z-index:4}
+.trash.micro svg{animation:twinkle 1.2s ease-in-out infinite alternate}@keyframes twinkle{from{opacity:.5;filter:none}to{opacity:1;filter:drop-shadow(0 0 4px #fff)}}
+.trash.bagw svg{animation:bagp 2s ease-in-out infinite alternate;transform-origin:50% 20%}@keyframes bagp{from{transform:scaleY(.9)}to{transform:scaleY(1.08)}}
+.oil{position:absolute;z-index:3;cursor:pointer;transform-origin:50% 0;transition:opacity .3s}.drip{animation:drip 2.2s ease-in infinite}@keyframes drip{from{transform:translateY(0);opacity:1}to{transform:translateY(40px);opacity:0}}
+.spark{position:absolute;z-index:20;font-size:24px;pointer-events:none;animation:spk .9s ease-out forwards}@keyframes spk{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+#yay{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:25;background:#fff;color:#023e8a;border:8px solid #06d6a0;border-radius:30px;padding:20px 34px;font-size:clamp(28px,5vw,48px);text-align:center;font-weight:bold;animation:pop .5s ease-out;box-shadow:0 10px 0 rgba(0,0,0,.15)}#yay small{font-size:.6em}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.3)}to{transform:translate(-50%,-50%) scale(1)}}
+.conf{position:fixed;top:-20px;width:12px;height:18px;z-index:24;border-radius:3px;animation:fall linear forwards;pointer-events:none}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.heart{position:absolute;left:50%;top:-10px;font-size:26px;pointer-events:none;animation:hrt 2s ease-out infinite}@keyframes hrt{from{transform:translate(-50%,0);opacity:1}to{transform:translate(-50%,-40px);opacity:0}}
+.cr.sad{filter:saturate(.55) brightness(.85)}.cr.happy:not(.avt)>svg{animation:hop .6s ease-in-out infinite alternate}@keyframes hop{to{transform:translateY(-8px)}}
+@media (max-width:600px){#bar button,#bar select{font-size:16px;min-height:46px;padding:6px 12px}#bar{gap:7px}}
 </style></head><body>
 <div id="sea"><div id="sand"></div></div>
 <div id="title"><div class="t1">🌊 Yusra's Diorama</div><div class="t2">Teacher: Ms. Wendy</div></div>
@@ -60,8 +72,9 @@ input{font:inherit;font-size:22px;padding:10px 16px;border-radius:20px;border:3p
 <button id="swim">📷 Become a sea creature!</button>
 <select id="pick" aria-label="Creature"></select><button id="add">➕ Add</button>
 <select id="sel" aria-label="Find a swimmer"></select>
-<button id="rm">🧹 Remove all</button><button id="reset">🔄 Reset</button><button id="collb">📚 Collection</button><button id="snap">📸 Snapshot</button>
+<button id="rm">🧹 Remove all</button><button id="reset">🔄 Reset</button><button id="collb">📚 Collection</button><button id="snap">📸 Snapshot</button><button id="pollb" style="background:#adb5bd">🗑️ Human Pollution</button><button id="cleanb" style="background:#06d6a0">🚤 Ocean Cleanup</button>
 </div>
+<button id="menub" aria-label="Menu" aria-expanded="false">🫧<span>Menu</span></button>
 <div class="ov" id="info"><div class="card" id="infoc"></div></div>
 <div class="ov" id="cam"><div class="card"><h2>Say cheese! 😁</h2>
 <div id="camv"><video id="vid" autoplay playsinline muted></video><br><button id="shoot">📸 Take photo</button></div>
@@ -75,4 +88,4 @@ input{font:inherit;font-size:22px;padding:10px 16px;border-radius:20px;border:3p
 <div class="rbox"><input id="rq" placeholder="🔬 Research any fish… (e.g. manta ray)" maxlength="40" autocomplete="off"><button id="rgo">🔎 Research</button><p id="rmsg"></p></div>
 <div class="grid" id="tiles"></div><button id="collx">Close</button></div></div>
 <div id="toast"></div>
-<script src="app.js"></script></body></html>
+<script src="app.js"></script><script src="pollution.js"></script></body></html>

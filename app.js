@@ -99,15 +99,15 @@ function spawn(type){const c=C[type]||resAsC(RES[type]),k=scale(),el=document.cr
  el.onclick=e=>{e.stopPropagation();showInfo(type)};sea.appendChild(el);things.push(t);refreshSel();return t}
 function spawnSelfie(s){if(things.some(t=>t.selfie&&t.selfie.id===s.id))return;const a=AV[s.av]||AV.mermaid,av=AV[s.av]?s.av:'mermaid',k=scale(),w=a.px*k,h=w*a.vb[1]/a.vb[0],el=document.createElement('div');el.className='cr selfie avt';
  const sk=SKIN[(s.id.charCodeAt(0)||0)%5];el.innerHTML=`<div class="body">${avSVG(av,s.col,sk)}</div>`;Object.assign(el.style,{width:w+'px',height:h+'px'});
- const t={id:++uid,selfie:s,av,m:a.m,el,w,h,x:Math.random()*(W-w),by:a.m==='floor'?Math.min(H*.87,$('bar').offsetTop)-h*.95:H*(.15+Math.random()*.5),dir:Math.random()<.5?1:-1,sp:(a.m==='jelly'?.35:.6)+Math.random()*.5,ph:Math.random()*6};
+ const t={id:++uid,selfie:s,av,m:a.m,el,w,h,x:Math.random()*(W-w),by:a.m==='floor'?H*.87-h*.95:H*(.15+Math.random()*.5),dir:Math.random()<.5?1:-1,sp:(a.m==='jelly'?.35:.6)+Math.random()*.5,ph:Math.random()*6};
  t.body=el.firstChild;t.face=circleEl(s.img,'face');el.appendChild(t.face);if(s.name){const l=document.createElement('div');l.className='lbl';l.textContent=s.name;el.appendChild(l)}placeFace(t);
  el.onclick=e=>{e.stopPropagation();toast('👋 Hi '+(s.name||'friend')+'! You are a '+(RES[s.av]?.title||a.n)+'!')};sea.appendChild(el);things.push(t);
  const ss=things.filter(t=>t.selfie).sort((a,b)=>a.selfie.t-b.selfie.t);while(ss.length>MAX_SELFIES)kill(ss.shift());refreshSel();return t}
 function kill(t){t.el.remove();things=things.filter(x=>x!==t)}
 let last=performance.now();
 function tick(now){const dt=Math.min(50,now-last)/16.7;last=now;
- for(const t of things){const c=C[t.type];t.x+=t.dir*t.sp*dt*1.4;t.ph+=.03*dt;if(t.x>W-t.w){t.x=W-t.w;t.dir=-1}if(t.x<0){t.x=0;t.dir=1}
-  if(t.av){const m=t.m,bob=m==='floor'?0:Math.sin(t.ph)*(m==='jelly'?25:12);t.y=t.by+bob;const fl=(m==='fish'||m==='puff'||m==='ray')?t.dir:1,f=fl<0;
+ for(const t of things){const c=C[t.type];t.ph+=.03*dt;if(!t.busy){t.x+=t.dir*t.sp*dt*1.4;if(t.x>W-t.w){t.x=W-t.w;t.dir=-1}if(t.x<0){t.x=0;t.dir=1}}
+  if(t.av){const m=t.m,bob=m==='floor'?0:Math.sin(t.ph)*(m==='jelly'?25:12);if(!t.busy)t.y=t.by+bob;const fl=(m==='fish'||m==='puff'||m==='ray')?t.dir:1,f=fl<0;
    if(f!==t.flipped){t.flipped=f;t.body.style.transform=`scaleX(${fl})`;placeFace(t)}
    let tr=`translate(${t.x}px,${t.y}px)`;if(m==='mer')tr+=` rotate(${Math.sin(t.ph*1.3)*8+t.dir*-20}deg) scaleX(${1})`;if(m==='puff')tr+=` scale(${1+Math.sin(t.ph*.7)*.08})`;if(m==='upright'||m==='jelly')tr+=` rotate(${Math.sin(t.ph)*5}deg)`;
    t.el.style.transform=tr;continue}
